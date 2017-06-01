@@ -3,8 +3,18 @@
                 https://github.com/Sejoslaw
 
 
-        This is a classic Roguelike Game.
-        This game should be OS independent.
+		Goals:
+			- a classic Roguelike Game
+			- OS independent (written only in C with only standard libraries)
+			- single-file project
+			- multi-world
+			- single-player
+			- multi-player + real-time action
+			- items (weapons, armor, potions, scrolls, spells)
+			- player inventory
+			- save / load
+			- enemies + bosses
+			- quests
 
         If anyone need it:
         char	        1 byte	        -128 to 127 OR 0 to 255
