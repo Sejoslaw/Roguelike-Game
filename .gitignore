@@ -1,3 +1,11 @@
+#CodeBlocks files and folders
+*.workspace.layout
+*.depend
+*.layout
+*.cscope_file_list
+/bin/
+/obj/
+
 # Prerequisites
 *.d
 
