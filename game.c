@@ -3,10 +3,10 @@
                 https://github.com/Sejoslaw
 
 
-        Variable meaning:
-            - GLOBAL_VALUE / DEFINE_VALUE
-            - MethodName / StructureVariableValue
-            - local_variable / variable_which_is_used_locally_by_function
+		Variable meaning:
+			- GLOBAL_VALUE / DEFINE_VALUE
+			- MethodName / StructureVariableValue
+			- local_variable / variable_which_is_used_locally_by_function
 
 		Goals:
 			- a classic Roguelike Game
