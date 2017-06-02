@@ -41,6 +41,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/// Add additional OS-specified libraries
+#ifdef _WIN32 || __WIN32 /// Windows
+    #define OS_WINDOWS
+    #include <windows.h>
+#elif __linux__ /// Linux
+#elif __sun /// Solaris
+#elif __FreeBSD__ /// FreeBSD
+#elif __NetBSD__ /// NetBSD
+#elif __OpenBSD__ /// OpenBSD
+#elif __APPLE__ /// Mac OS X
+#elif __hpux /// HP-UX
+#elif __osf__ /// Tru64 UNIX (formerly DEC OSF1)
+#elif __sgi /// Irix
+#elif _AIX /// AIX
+#endif
+
 /// Debug is used to print additional information and custom stuff
 #define DEBUG 1
 
@@ -261,6 +277,11 @@ void PlayerMoveRight()
 /// Main function
 int main(int argc, char *argv[])
 {
+    /// Run additional (pre-run) things based on OS
+    #ifdef OS_WINDOWS
+        SetConsoleTitle("KD Roguelike Game");
+    #endif // OS_WINDOWS
+
     srand(time(NULL)); /// Start random generator
 
     WORLD = NewWorld(); /// Set new World
