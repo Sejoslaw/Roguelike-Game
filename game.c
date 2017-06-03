@@ -84,6 +84,15 @@
 /// (x, y) position on World
 #define WORLD_POS(x, y) WORLD->Tile[x][y]
 
+/// Camera display distance - always odd number for Player to be in the middle (eg. 9, 11, 13, 123, etc.)
+/// Count from each side from Player in the middle
+#define CAMERA_DISTANCE 5
+/// Camera position based on Player coordinate
+/// Player position is for Camera a (playerX/2; playerY/2) point
+#define CAMERA_POS(x, y) WORLD_POS(PLAYER->PosX - CAMERA_DISTANCE + x, PLAYER->PosY - CAMERA_DISTANCE + y)
+/// Full size of the camera
+#define CAMERA_SIZE (CAMERA_DISTANCE * 2) + 1
+
 /// Commands array length
 const unsigned char COMMAND_LENGTH = 7;
 /// Commands definition
@@ -91,7 +100,7 @@ const char *COMMAND[] =
 {
     "",
     "Commands keys:",
-    "q - Exit / Quit the game",
+    "q - Exit / Quit game",
     "w - Move Player Up",
     "s - Move Player Down",
     "a - Move Player Left",
@@ -122,11 +131,11 @@ const unsigned char CHAR_WALL = 219;
 const unsigned char CHAR_TUNNEL = 35;
 const unsigned char CHAR_FLOOR = 46;
 const unsigned char CHAR_PLAYER = 64;
+const unsigned char CHAR_ENEMY = 69;
 /*
 const unsigned char CHAR_GOLD = 36;
 const unsigned char CHAR_DOORS = 43;
 const unsigned char CHAR_POTION = 33;
-const unsigned char CHAR_ENEMY = 69;
 const unsigned char CHAR_LEVEL_NEXT = 62;
 const unsigned char CHAR_LEVEL_BEFORE = 60;
 const unsigned char CHAR_MYSTIC_SCROLL = 63;
@@ -190,35 +199,34 @@ void GenerateWorld()
 }
 
 /// Array which holds data of all used Tiles - used when Origin is printing
-unsigned char tiles_to_print[WORLD_SIZE];
+unsigned char tiles_to_print[CAMERA_SIZE];
 
 /// Returns 1 if given tile is on tiles_to_print list
 unsigned char IsTileOnList(unsigned char tile)
 {
-    for (int ut = 0; ut < WORLD_SIZE; ++ut) /// Check on list
+    for (int ut = 0; ut < CAMERA_SIZE; ++ut) /// Check on list
         if (tiles_to_print[ut] == tile)
             return 1;
     return 0;
 }
 
-/// TODO: Remake it for Camera
 /// Print origin of the Tiles of World
 void PrintWorldTileOrigin()
 {
-    for (int i = 0; i < WORLD_SIZE; ++i) /// Set all array to 0 - empty space
+    for (int i = 0; i < CAMERA_SIZE; ++i) /// Set all array to 0 - empty space
         tiles_to_print[i] = CHAR_EMPTY;
 
     /// Add Player to Origin
     tiles_to_print[0] = CHAR_PLAYER;
 
     /// Search all region
-    for (int x = 0; x < WORLD_SIZE; ++x)
-        for (int y = 0; y < WORLD_SIZE; ++y)
+    for (int x = 0; x < CAMERA_SIZE; ++x)
+        for (int y = 0; y < CAMERA_SIZE; ++y)
         {
-            unsigned char tile = WORLD_POS(x, y); /// Currently checking tile
+            unsigned char tile = CAMERA_POS(x, y); /// Currently checking tile
             if (!IsTileOnList(tile))
             {
-                for (int i = 0; i < WORLD_SIZE; ++i) /// Add new tile char to be print
+                for (int i = 0; i < CAMERA_SIZE; ++i) /// Add new tile char to be print
                 {
                     if (tiles_to_print[i] == tile)
                         break;
@@ -233,7 +241,7 @@ void PrintWorldTileOrigin()
 
     /// Print tiles
     printf("\t Origin: \n");
-    for (int i = 0; i < WORLD_SIZE; ++i)
+    for (int i = 0; i < CAMERA_SIZE; ++i)
     {
         if (tiles_to_print[i] == CHAR_WALL)
             printf("\t %c - Wall \n", CHAR_WALL);
@@ -246,30 +254,51 @@ void PrintWorldTileOrigin()
     }
 }
 
-/// TODO: Remake it for Camera
+/// Prints data about Player
+void PrintPlayerData()
+{
+    printf("\n");
+    printf("\t Player Data: \n");
+    printf("\t Player Pos X = %i\n", PLAYER->PosX);
+    printf("\t Player Pos Y = %i\n", PLAYER->PosY);
+    printf("\n");
+}
+
+/// TODO: Fix - do not show symbols outside World
 /// Print World and everything to screen
 void PrintWorld()
 {
     /// Print World from each Tile and add other Tiles and Entities
-    for (int x = 0; x < WORLD->Size; ++x)
+    for (int x = 0; x < CAMERA_SIZE; ++x)
     {
-        for (int y = 0; y < WORLD->Size; ++y)
-            if (x == PLAYER->PosX && y == PLAYER->PosY)
+        for (int y = 0; y < CAMERA_SIZE; ++y)
+        {
+            if (x == CAMERA_DISTANCE && y == CAMERA_DISTANCE)
             {
                 PRINT_COLOR_CHAR(CHAR_PLAYER, COLOR_CYAN); /// Print Player in color
             }
+            else if (PLAYER->PosX > WORLD_SIZE || PLAYER->PosY > WORLD_SIZE) /// If outside World bounds - don't print
+            {
+                printf(" ");
+            }
             else
-                printf("%c", WORLD_POS(x, y));
+                printf("%c", CAMERA_POS(x, y));
+        }
 
         /// Print Movement
         if (x < COMMAND_LENGTH)
             printf("\t %s", COMMAND[x]);
+
+        /// End Line
         printf("\n");
     }
     printf("\n");
 
     /// Print chars meaning
     PrintWorldTileOrigin();
+
+    /// Print Player data
+    PrintPlayerData();
 }
 
 
