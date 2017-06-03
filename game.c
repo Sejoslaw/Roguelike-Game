@@ -4,7 +4,7 @@
 
 
 		Variable meaning:
-			- GLOBAL_VALUE / DEFINE_VALUE
+			- GLOBAL_VALUE / DEFINE_VALUE / DEFINE_METHOD
 			- MethodName / StructureVariableValue
 			- local_variable / variable_which_is_used_locally_by_function
 
@@ -40,6 +40,10 @@
 /// ======================================================================== Libraries and global defines
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <math.h>
+#include <string.h>
+#include <stdbool.h>
 
 /// Add additional OS-specified libraries
 #ifdef _WIN32 || __WIN32 /// Windows
@@ -57,22 +61,41 @@
 #elif _AIX /// AIX
 #endif
 
+/// Colors
+#define COLOR_RED "\x1B[31m"
+#define COLOR_GREEN "\x1B[32m"
+#define COLOR_YELLOW "\x1B[33m"
+#define COLOR_BLUE "\x1B[34m"
+#define COLOR_MAGENTA "\x1B[35m"
+#define COLOR_CYAN "\x1B[36m"
+#define COLOR_WHITE "\x1B[37m"
+#define COLOR_RESET "\x1B[0m"
+
+/// Print colored char
+#define PRINT_COLOR_CHAR(text_char, color) printf(color "%c" COLOR_RESET, text_char);
+/// Print colored string
+#define PRINT_COLOR_TEXT(text, color) printf(color "%s" COLOR_RESET, text);
+
 /// Debug is used to print additional information and custom stuff
 #define DEBUG 1
 
 /// Default World size
 #define WORLD_SIZE 20
-
 /// (x, y) position on World
-#define WORLD_POS(x, y) WORLD->Tile[x * WORLD_SIZE + y]
+#define WORLD_POS(x, y) WORLD->Tile[x][y]
 
 /// Commands array length
-const unsigned char COMMAND_LENGTH = 2;
+const unsigned char COMMAND_LENGTH = 7;
 /// Commands definition
 const char *COMMAND[] =
 {
+    "",
     "Commands keys:",
-    "exit / quit - exit the game"
+    "q - Exit / Quit the game",
+    "w - Move Player Up",
+    "s - Move Player Down",
+    "a - Move Player Left",
+    "d - Move Player Right"
 };
 
 
@@ -115,7 +138,7 @@ const unsigned char CHAR_MYSTIC_SCROLL = 63;
 typedef struct World
 {
     unsigned char Size; /// Size of the World
-    unsigned char Tile[WORLD_SIZE * WORLD_SIZE]; /// All World tiles / chars
+    unsigned char Tile[WORLD_SIZE][WORLD_SIZE]; /// All World tiles / chars
 } World;
 /// World itself
 World* WORLD;
@@ -123,7 +146,7 @@ World* WORLD;
 /// Entity / Player definition
 typedef struct Entity
 {
-    int PosX, PosY;
+    unsigned char PosX, PosY;
 } Entity;
 /// Player itself
 Entity* PLAYER;
@@ -219,7 +242,7 @@ void PrintWorldTileOrigin()
         else if (tiles_to_print[i] == CHAR_FLOOR)
             printf("\t %c - Floor \n", CHAR_FLOOR);
         else if (tiles_to_print[i] == CHAR_PLAYER)
-            printf("\t %c - Player \n", CHAR_PLAYER);
+            printf("\t" COLOR_CYAN " %c" COLOR_RESET " - Player \n", CHAR_PLAYER);
     }
 }
 
@@ -232,7 +255,9 @@ void PrintWorld()
     {
         for (int y = 0; y < WORLD->Size; ++y)
             if (x == PLAYER->PosX && y == PLAYER->PosY)
-                printf("%c", CHAR_PLAYER);
+            {
+                PRINT_COLOR_CHAR(CHAR_PLAYER, COLOR_CYAN); /// Print Player in color
+            }
             else
                 printf("%c", WORLD_POS(x, y));
 
@@ -252,25 +277,29 @@ void PrintWorld()
 /// Move Player Down
 void PlayerMoveDown()
 {
-    PLAYER->PosX += 1;
+    if (WORLD_POS(PLAYER->PosX + 1, PLAYER->PosY) != CHAR_WALL)
+        PLAYER->PosX += 1;
 }
 
 /// Move Player Up
 void PlayerMoveUp()
 {
-    PLAYER->PosX -= 1;
+    if (WORLD_POS(PLAYER->PosX - 1, PLAYER->PosY)  != CHAR_WALL)
+        PLAYER->PosX -= 1;
 }
 
 /// Move Player Left
 void PlayerMoveLeft()
 {
-    PLAYER->PosY -= 1;
+    if (WORLD_POS(PLAYER->PosX, PLAYER->PosY - 1)  != CHAR_WALL)
+        PLAYER->PosY -= 1;
 }
 
 /// Move Player Right
 void PlayerMoveRight()
 {
-    PLAYER->PosY += 1;
+    if (WORLD_POS(PLAYER->PosX, PLAYER->PosY + 1)  != CHAR_WALL)
+        PLAYER->PosY += 1;
 }
 
 /// ======================================================================== Main
@@ -287,10 +316,7 @@ int main(int argc, char *argv[])
     WORLD = NewWorld(); /// Set new World
     PLAYER = NewPlayer(); /// Set new Player
 
-    /// User input action
-    const action_length = 10;
-    char action[action_length];
-    char *input;
+    char input; /// User input action
 
     GenerateWorld(); /// Generate World
 
@@ -302,22 +328,22 @@ int main(int argc, char *argv[])
         PrintWorld(); /// Print current World stage
 
         printf("Action > ");
-        input = fgets(action, action_length, stdin); /// Read user input
+        scanf(" %c", &input);
 
         /// TODO: Fix crashing when Player move
         /// Execute right command
-        if (strcmp(input, "exit") == 1 || strcmp(input, "quit") == 1) /// Quit the game
-            break;
-        else if (strcmp(input, "down") == 1 || (strcmp(input, "d") == 1))
+        if (input == 'q') /// Quit the game
+            return 0;
+        else if (input == 's')
             PlayerMoveDown();
-        else if (strcmp(input, "up") == 1 || (strcmp(input, "u") == 1))
+        else if (input == 'w')
             PlayerMoveUp();
-        else if (strcmp(input, "left") == 1 || strcmp(input, "l") == 1)
+        else if (input == 'a')
             PlayerMoveLeft();
-        else if (strcmp(input, "right") == 1 || strcmp(input, "r") == 1)
+        else if (input == 'd')
             PlayerMoveRight();
-        else if (strcmp(input, "debug") == 1)
-            printf("DEBUG = %i", DEBUG);
+        else
+            {/** Just repaint if something wrong was given as input */}
     }
 
     /// Ending
