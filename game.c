@@ -84,12 +84,16 @@
 /// (x, y) position on World
 #define WORLD_POS(x, y) WORLD->Tile[x][y]
 
+/// Value of Camera position on World on X-Axis
+#define CAMERA_POS_X_ON_WORLD(x) PLAYER->PosX - CAMERA_DISTANCE + x
+/// Value of Camera position on World on Y_Axis
+#define CAMERA_POS_Y_ON_WORLD(y) PLAYER->PosY - CAMERA_DISTANCE + y
 /// Camera display distance - always odd number for Player to be in the middle (eg. 9, 11, 13, 123, etc.)
 /// Count from each side from Player in the middle
-#define CAMERA_DISTANCE 5
+#define CAMERA_DISTANCE 7
 /// Camera position based on Player coordinate
 /// Player position is for Camera a (playerX/2; playerY/2) point
-#define CAMERA_POS(x, y) WORLD_POS(PLAYER->PosX - CAMERA_DISTANCE + x, PLAYER->PosY - CAMERA_DISTANCE + y)
+#define CAMERA_POS(x, y) WORLD_POS(CAMERA_POS_X_ON_WORLD(x), CAMERA_POS_Y_ON_WORLD(y))
 /// Full size of the camera
 #define CAMERA_SIZE (CAMERA_DISTANCE * 2) + 1
 
@@ -277,7 +281,11 @@ void PrintWorld()
             {
                 PRINT_COLOR_CHAR(CHAR_PLAYER, COLOR_CYAN); /// Print Player in color
             }
-            else if (PLAYER->PosX > WORLD_SIZE || PLAYER->PosY > WORLD_SIZE) /// If outside World bounds - don't print
+            /// If outside World bounds - don't print / print empty char
+            else if (CAMERA_POS_X_ON_WORLD(x) < 0 ||
+                     CAMERA_POS_Y_ON_WORLD(y) < 0 ||
+                     CAMERA_POS_X_ON_WORLD(x) > WORLD_SIZE - 1 ||
+                     CAMERA_POS_Y_ON_WORLD(y) > WORLD_SIZE - 1)
             {
                 printf(" ");
             }
