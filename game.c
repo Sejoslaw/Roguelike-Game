@@ -62,8 +62,11 @@
 #endif
 
 /// Coordinate type - used for position manipulation
-/// For example: used to specified Entity position
+/// For example: used to specified Entity's position
 typedef unsigned char Coordinate;
+
+/// Unique identifier
+typedef unsigned char Id;
 
 /// Colors
 #define COLOR_RED "\x1B[31m"
@@ -140,6 +143,7 @@ const unsigned char CHAR_TUNNEL = 35;
 const unsigned char CHAR_FLOOR = 46;
 const unsigned char CHAR_PLAYER = 64;
 const unsigned char CHAR_ENEMY = 69;
+const unsigned char CHAR_MOB = 77;
 /*
 const unsigned char CHAR_GOLD = 36;
 const unsigned char CHAR_DOORS = 43;
@@ -156,6 +160,7 @@ typedef struct World
 {
     unsigned char Size; /// Size of the World
     unsigned char Tile[WORLD_SIZE][WORLD_SIZE]; /// All World tiles / chars
+    Id WorldId;
 } World;
 /// World itself
 World* WORLD;
@@ -171,10 +176,11 @@ Entity* PLAYER;
 
 /// ======================================================================== Mallocs - global makers
 /// Create new World
-World* NewWorld()
+World* NewWorld(Id worldId)
 {
     World *new_world = malloc(sizeof(World));
     new_world->Size = WORLD_SIZE;
+    new_world->WorldId = worldId;
 
     return new_world;
 }
@@ -204,6 +210,9 @@ void GenerateWorld()
     for (int x = 1; x < WORLD_SIZE - 1; ++x)
         for (int y = 1; y < WORLD_SIZE - 1; ++y)
             WORLD_POS(x, y) = CHAR_FLOOR;
+
+    WORLD_POS(10, 10) = CHAR_ENEMY;
+    WORLD_POS(10, 12) = CHAR_MOB;
 }
 
 /// Array which holds data of all used Tiles - used when Origin is printing
@@ -259,6 +268,10 @@ void PrintWorldTileOrigin()
             printf("\t %c - Floor \n", CHAR_FLOOR);
         else if (tiles_to_print[i] == CHAR_PLAYER)
             printf("\t" COLOR_CYAN " %c" COLOR_RESET " - Player \n", CHAR_PLAYER);
+        else if (tiles_to_print[i] == CHAR_ENEMY)
+            printf("\t" COLOR_RED " %c" COLOR_RESET " - Enemy \n", CHAR_ENEMY);
+        else if (tiles_to_print[i] == CHAR_MOB)
+            printf("\t" COLOR_YELLOW " %c" COLOR_RESET " - Mob \n", CHAR_MOB);
     }
 }
 
@@ -266,7 +279,8 @@ void PrintWorldTileOrigin()
 void PrintPlayerData()
 {
     printf("\n");
-    printf("\t Player Data: \n");
+    printf("\t Additional Data: \n");
+    printf("\t World Id = %i \n", WORLD->WorldId);
     printf("\t Player Pos X = %i\n", PLAYER->PosX);
     printf("\t Player Pos Y = %i\n", PLAYER->PosY);
     printf("\n");
@@ -292,6 +306,14 @@ void PrintWorld()
             {
                 printf("%c", CHAR_EMPTY);
             }
+            else if (CAMERA_POS(x, y) == CHAR_ENEMY)
+            {
+                PRINT_COLOR_CHAR(CHAR_ENEMY, COLOR_RED);
+            }
+            else if (CAMERA_POS(x, y) == CHAR_MOB)
+            {
+                PRINT_COLOR_CHAR(CHAR_MOB, COLOR_YELLOW);
+            }
             else
                 printf("%c", CAMERA_POS(x, y));
         }
@@ -312,13 +334,13 @@ void PrintWorld()
     PrintPlayerData();
 }
 
-/// Move Player to specified position
-void MovePlayer(Coordinate x, Coordinate y)
+/// Move specified Entity to specified position
+void MoveEntity(Entity* entity, Coordinate x, Coordinate y)
 {
     if (WORLD_POS(x, y) != CHAR_WALL)
     {
-        PLAYER->PosX = x;
-        PLAYER->PosY = y;
+        entity->PosX = x;
+        entity->PosY = y;
     }
 }
 
@@ -334,7 +356,7 @@ int main(int argc, char *argv[])
 
     srand(time(NULL)); /// Start random generator
 
-    WORLD = NewWorld(); /// Set new World
+    WORLD = NewWorld(0); /// Set new World
     PLAYER = NewPlayer(); /// Set new Player
 
     char input; /// User input action
@@ -356,13 +378,13 @@ int main(int argc, char *argv[])
         if (input == 'q') /// Quit the game
             return 0;
         else if (input == 's')
-            MovePlayer(PLAYER->PosX + 1, PLAYER->PosY);
+            MoveEntity(PLAYER, PLAYER->PosX + 1, PLAYER->PosY);
         else if (input == 'w')
-            MovePlayer(PLAYER->PosX - 1, PLAYER->PosY);
+            MoveEntity(PLAYER, PLAYER->PosX - 1, PLAYER->PosY);
         else if (input == 'a')
-            MovePlayer(PLAYER->PosX, PLAYER->PosY - 1);
+            MoveEntity(PLAYER, PLAYER->PosX, PLAYER->PosY - 1);
         else if (input == 'd')
-            MovePlayer(PLAYER->PosX, PLAYER->PosY + 1);
+            MoveEntity(PLAYER, PLAYER->PosX, PLAYER->PosY + 1);
     }
 
     /// Ending
