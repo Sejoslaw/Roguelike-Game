@@ -6,7 +6,7 @@
 		Variable meaning:
 			- GLOBAL_VALUE / DEFINE_VALUE / DEFINE_METHOD
 			- MethodName / StructureVariableValue
-			- local_variable / variable_which_is_used_locally_by_function
+			- local_variable / variable_which_is_used_by_local_function
 
 		Goals:
 			- a classic Roguelike Game
@@ -60,6 +60,10 @@
 #elif __sgi /// Irix
 #elif _AIX /// AIX
 #endif
+
+/// Coordinate type - used for position manipulation
+/// For example: used to specified Entity position
+typedef unsigned char Coordinate;
 
 /// Colors
 #define COLOR_RED "\x1B[31m"
@@ -159,7 +163,7 @@ World* WORLD;
 /// Entity / Player definition
 typedef struct Entity
 {
-    unsigned char PosX, PosY;
+    Coordinate PosX, PosY;
 } Entity;
 /// Player itself
 Entity* PLAYER;
@@ -286,7 +290,7 @@ void PrintWorld()
                      CAMERA_POS_X_ON_WORLD(x) > WORLD_SIZE - 1 ||
                      CAMERA_POS_Y_ON_WORLD(y) > WORLD_SIZE - 1)
             {
-                printf(" ");
+                printf("%c", CHAR_EMPTY);
             }
             else
                 printf("%c", CAMERA_POS(x, y));
@@ -308,35 +312,16 @@ void PrintWorld()
     PrintPlayerData();
 }
 
-
-/// ======================================================================== Player movement
-/// Move Player Down
-void PlayerMoveDown()
+/// Move Player to specified position
+void MovePlayer(Coordinate x, Coordinate y)
 {
-    if (WORLD_POS(PLAYER->PosX + 1, PLAYER->PosY) != CHAR_WALL)
-        PLAYER->PosX += 1;
+    if (WORLD_POS(x, y) != CHAR_WALL)
+    {
+        PLAYER->PosX = x;
+        PLAYER->PosY = y;
+    }
 }
 
-/// Move Player Up
-void PlayerMoveUp()
-{
-    if (WORLD_POS(PLAYER->PosX - 1, PLAYER->PosY)  != CHAR_WALL)
-        PLAYER->PosX -= 1;
-}
-
-/// Move Player Left
-void PlayerMoveLeft()
-{
-    if (WORLD_POS(PLAYER->PosX, PLAYER->PosY - 1)  != CHAR_WALL)
-        PLAYER->PosY -= 1;
-}
-
-/// Move Player Right
-void PlayerMoveRight()
-{
-    if (WORLD_POS(PLAYER->PosX, PLAYER->PosY + 1)  != CHAR_WALL)
-        PLAYER->PosY += 1;
-}
 
 /// ======================================================================== Main
 /// Main function
@@ -371,15 +356,13 @@ int main(int argc, char *argv[])
         if (input == 'q') /// Quit the game
             return 0;
         else if (input == 's')
-            PlayerMoveDown();
+            MovePlayer(PLAYER->PosX + 1, PLAYER->PosY);
         else if (input == 'w')
-            PlayerMoveUp();
+            MovePlayer(PLAYER->PosX - 1, PLAYER->PosY);
         else if (input == 'a')
-            PlayerMoveLeft();
+            MovePlayer(PLAYER->PosX, PLAYER->PosY - 1);
         else if (input == 'd')
-            PlayerMoveRight();
-        else
-            {/** Just repaint if something wrong was given as input */}
+            MovePlayer(PLAYER->PosX, PLAYER->PosY + 1);
     }
 
     /// Ending
