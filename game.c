@@ -165,7 +165,7 @@ typedef struct Entity
 Entity* PLAYER;
 
 
-/// ======================================================================== Mallocs - static makers
+/// ======================================================================== Mallocs - global makers
 /// Create new World
 World* NewWorld()
 {
@@ -268,7 +268,6 @@ void PrintPlayerData()
     printf("\n");
 }
 
-/// TODO: Fix - do not show symbols outside World
 /// Print World and everything to screen
 void PrintWorld()
 {
