@@ -68,6 +68,9 @@ typedef unsigned char Coordinate;
 /// Unique identifier
 typedef unsigned char Id;
 
+/// Type which defines character in ASCII table
+typedef unsigned char ASCII;
+
 /// Colors
 #define COLOR_RED "\x1B[31m"
 #define COLOR_GREEN "\x1B[32m"
@@ -105,7 +108,7 @@ typedef unsigned char Id;
 #define CAMERA_SIZE (CAMERA_DISTANCE * 2) + 1
 
 /// Commands array length
-const unsigned char COMMAND_LENGTH = 7;
+#define COMMAND_LENGTH 7
 /// Commands definition
 const char *COMMAND[] =
 {
@@ -116,6 +119,41 @@ const char *COMMAND[] =
     "s - Move Player Down",
     "a - Move Player Left",
     "d - Move Player Right"
+};
+
+
+/// ============================================================= ASCII Characters - which character to print in console
+#define CHAR_EMPTY 0
+#define CHAR_SPACE 160
+
+#define CHAR_WALL 219
+#define CHAR_TUNNEL 35
+#define CHAR_FLOOR 46
+#define CHAR_PLAYER 64
+#define CHAR_ENEMY 69
+#define CHAR_MOB 77
+#define CHAR_STAIRS_UP 62
+#define CHAR_STAIRS_DOWN 60
+/*
+#define CHAR_GOLD 36
+#define CHAR_DOORS 43
+#define CHAR_POTION 33
+#define CHAR_MYSTIC_SCROLL 63
+*/
+
+/// Length of all registered chars
+#define REGISTERED_CHAR_LENGTH 8
+/// All currently registered chars array - except CHAR_EMPTY and CHAR_SPACE
+const ASCII REGISTERED_CHAR[REGISTERED_CHAR_LENGTH] =
+{
+    CHAR_WALL,
+    CHAR_TUNNEL,
+    CHAR_FLOOR,
+    CHAR_PLAYER,
+    CHAR_ENEMY,
+    CHAR_MOB,
+    CHAR_STAIRS_UP,
+    CHAR_STAIRS_DOWN
 };
 
 
@@ -136,30 +174,12 @@ int random(int min, int max)
 }
 
 
-/// ============================================================= ASCII Characters - which character to print in console
-const unsigned char CHAR_EMPTY = 0;
-const unsigned char CHAR_WALL = 219;
-const unsigned char CHAR_TUNNEL = 35;
-const unsigned char CHAR_FLOOR = 46;
-const unsigned char CHAR_PLAYER = 64;
-const unsigned char CHAR_ENEMY = 69;
-const unsigned char CHAR_MOB = 77;
-/*
-const unsigned char CHAR_GOLD = 36;
-const unsigned char CHAR_DOORS = 43;
-const unsigned char CHAR_POTION = 33;
-const unsigned char CHAR_LEVEL_NEXT = 62;
-const unsigned char CHAR_LEVEL_BEFORE = 60;
-const unsigned char CHAR_MYSTIC_SCROLL = 63;
-*/
-
-
 /// ======================================================================== Types
 /// World definition
 typedef struct World
 {
     unsigned char Size; /// Size of the World
-    unsigned char Tile[WORLD_SIZE][WORLD_SIZE]; /// All World tiles / chars
+    ASCII Tile[WORLD_SIZE][WORLD_SIZE]; /// All World tiles / chars
     Id WorldId;
 } World;
 /// World itself
@@ -211,83 +231,15 @@ void GenerateWorld()
         for (int y = 1; y < WORLD_SIZE - 1; ++y)
             WORLD_POS(x, y) = CHAR_FLOOR;
 
-    WORLD_POS(10, 10) = CHAR_ENEMY;
-    WORLD_POS(10, 12) = CHAR_MOB;
+    /// FIX - check where stairs are placed when World is generated
+    /// FIX - check if stairs and not on top of each other
+    /// Add stairs to next and previous World
+    WORLD_POS(random(1, WORLD_SIZE - 1), random(1, WORLD_SIZE - 1)) = CHAR_STAIRS_UP;
+    WORLD_POS(random(1, WORLD_SIZE - 1), random(1, WORLD_SIZE - 1)) = CHAR_STAIRS_DOWN;
 }
 
-/// Array which holds data of all used Tiles - used when Origin is printing
-unsigned char tiles_to_print[CAMERA_SIZE];
-
-/// Returns 1 if given tile is on tiles_to_print list
-unsigned char IsTileOnList(unsigned char tile)
-{
-    for (int ut = 0; ut < CAMERA_SIZE; ++ut) /// Check on list
-        if (tiles_to_print[ut] == tile)
-            return 1;
-    return 0;
-}
-
-/// Print origin of the Tiles of World
-void PrintWorldTileOrigin()
-{
-    for (int i = 0; i < CAMERA_SIZE; ++i) /// Set all array to 0 - empty space
-        tiles_to_print[i] = CHAR_EMPTY;
-
-    /// Add Player to Origin
-    tiles_to_print[0] = CHAR_PLAYER;
-
-    /// Search all region
-    for (int x = 0; x < CAMERA_SIZE; ++x)
-        for (int y = 0; y < CAMERA_SIZE; ++y)
-        {
-            unsigned char tile = CAMERA_POS(x, y); /// Currently checking tile
-            if (!IsTileOnList(tile))
-            {
-                for (int i = 0; i < CAMERA_SIZE; ++i) /// Add new tile char to be print
-                {
-                    if (tiles_to_print[i] == tile)
-                        break;
-                    else if (tiles_to_print[i] == CHAR_EMPTY)
-                    {
-                        tiles_to_print[i] = tile;
-                        break;
-                    }
-                }
-            }
-        }
-
-    /// Print tiles
-    printf("\t Origin: \n");
-    for (int i = 0; i < CAMERA_SIZE; ++i)
-    {
-        if (tiles_to_print[i] == CHAR_WALL)
-            printf("\t %c - Wall \n", CHAR_WALL);
-        else if (tiles_to_print[i] == CHAR_TUNNEL)
-            printf("\t %c - Tunnel \n", CHAR_TUNNEL);
-        else if (tiles_to_print[i] == CHAR_FLOOR)
-            printf("\t %c - Floor \n", CHAR_FLOOR);
-        else if (tiles_to_print[i] == CHAR_PLAYER)
-            printf("\t" COLOR_CYAN " %c" COLOR_RESET " - Player \n", CHAR_PLAYER);
-        else if (tiles_to_print[i] == CHAR_ENEMY)
-            printf("\t" COLOR_RED " %c" COLOR_RESET " - Enemy \n", CHAR_ENEMY);
-        else if (tiles_to_print[i] == CHAR_MOB)
-            printf("\t" COLOR_YELLOW " %c" COLOR_RESET " - Mob \n", CHAR_MOB);
-    }
-}
-
-/// Prints data about Player
-void PrintPlayerData()
-{
-    printf("\n");
-    printf("\t Additional Data: \n");
-    printf("\t World Id = %i \n", WORLD->WorldId);
-    printf("\t Player Pos X = %i\n", PLAYER->PosX);
-    printf("\t Player Pos Y = %i\n", PLAYER->PosY);
-    printf("\n");
-}
-
-/// Print World and everything to screen
-void PrintWorld()
+/// Print current view of the Camera to the screen
+void PrintCameraView()
 {
     /// Print World from each Tile and add other Tiles and Entities
     for (int x = 0; x < CAMERA_SIZE; ++x)
@@ -314,6 +266,10 @@ void PrintWorld()
             {
                 PRINT_COLOR_CHAR(CHAR_MOB, COLOR_YELLOW);
             }
+            else if (CAMERA_POS(x, y) == CHAR_STAIRS_UP)
+                printf("%c", CHAR_STAIRS_UP);
+            else if (CAMERA_POS(x, y) == CHAR_STAIRS_DOWN)
+                printf("%c", CHAR_STAIRS_DOWN);
             else
                 printf("%c", CAMERA_POS(x, y));
         }
@@ -326,12 +282,89 @@ void PrintWorld()
         printf("\n");
     }
     printf("\n");
+}
 
-    /// Print chars meaning
-    PrintWorldTileOrigin();
+/// Array which holds data of all used Tiles - used when Origin is printing
+/// This array is too big to hold worst case scenario which is that all tiles are different (not possible).
+ASCII tiles_to_print[CAMERA_SIZE * CAMERA_SIZE];
 
-    /// Print Player data
-    PrintPlayerData();
+/// Returns 1 if given tile is in tiles_to_print array
+BOOL IsTileInArray(ASCII tile)
+{
+    for (int ut = 0; ut < CAMERA_SIZE * CAMERA_SIZE; ++ut) /// Check in array
+        if (tiles_to_print[ut] == tile)
+            return TRUE;
+    return FALSE;
+}
+
+/// Add specified tile to tiles_to_print array
+void AddTileToArray(ASCII tile)
+{
+    /// Search for free space in array
+    for (int i = 1; i < CAMERA_SIZE * CAMERA_SIZE; ++i) /// start from 1 because Player is in space 0
+    {
+        if (tile == tiles_to_print[i]) /// Tile is already in array
+            return;
+        else if (tiles_to_print[i] == CHAR_EMPTY || tiles_to_print[i] == CHAR_SPACE)
+        {
+            tiles_to_print[i] = tile;
+            return;
+        }
+    }
+}
+
+/// Print origin of the Tiles of World
+void PrintOrigin()
+{
+    for (int i = 0; i < CAMERA_SIZE * CAMERA_SIZE; ++i) /// Set all array to 0 - empty space
+        tiles_to_print[i] = CHAR_EMPTY;
+
+    /// Add Player to Origin
+    tiles_to_print[0] = CHAR_PLAYER;
+
+    /// Search all region
+    for (int y = 0; y < CAMERA_SIZE; ++y)
+        for (int x = 0; x < CAMERA_SIZE; ++x)
+        {
+            ASCII tile = CAMERA_POS(x, y); /// Currently checking tile
+            if (tile != CHAR_EMPTY && tile != CHAR_SPACE) /// If checking tile is an empty space - don't add it
+                for (int i = 0; i < REGISTERED_CHAR_LENGTH; ++i)
+                    if (tile == REGISTERED_CHAR[i])
+                        AddTileToArray(tile);
+        }
+
+    /// Print tiles
+    printf("\t Origin: \n");
+    /// Player will be always print
+    printf("\t" COLOR_CYAN " %c" COLOR_RESET " - Player \n", CHAR_PLAYER);
+    for (int i = 1; i < CAMERA_SIZE * CAMERA_SIZE; ++i)
+    {
+        if (tiles_to_print[i] == CHAR_WALL)
+            printf("\t %c - Wall \n", CHAR_WALL);
+        else if (tiles_to_print[i] == CHAR_TUNNEL)
+            printf("\t %c - Tunnel \n", CHAR_TUNNEL);
+        else if (tiles_to_print[i] == CHAR_FLOOR)
+            printf("\t %c - Floor \n", CHAR_FLOOR);
+        else if (tiles_to_print[i] == CHAR_ENEMY)
+            printf("\t" COLOR_RED " %c" COLOR_RESET " - Enemy \n", CHAR_ENEMY);
+        else if (tiles_to_print[i] == CHAR_MOB)
+            printf("\t" COLOR_YELLOW " %c" COLOR_RESET " - Mob \n", CHAR_MOB);
+        else if (tiles_to_print[i] == CHAR_STAIRS_UP)
+            printf("\t %c - Stairs Up \n", CHAR_STAIRS_UP);
+        else if (tiles_to_print[i] == CHAR_STAIRS_DOWN)
+            printf("\t %c - Stairs Down \n", CHAR_STAIRS_DOWN);
+    }
+}
+
+/// Prints additional data
+void PrintAdditionalData()
+{
+    printf("\n");
+    printf("\t Additional Data: \n");
+    printf("\t World Id = %i \n", WORLD->WorldId);
+    printf("\t Player Pos X = %i\n", PLAYER->PosX);
+    printf("\t Player Pos Y = %i\n", PLAYER->PosY);
+    printf("\n");
 }
 
 /// Move specified Entity to specified position
@@ -368,7 +401,9 @@ int main(int argc, char *argv[])
     {
         system("cls"); /// Clear screen
 
-        PrintWorld(); /// Print current World stage
+        PrintCameraView(); /// Print current Camera stage
+        PrintOrigin(); /// Print chars meaning - origin
+        PrintAdditionalData(); /// Print additional data
 
         printf("Action > ");
         scanf(" %c", &input);
