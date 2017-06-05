@@ -71,6 +71,17 @@ typedef unsigned char Id;
 /// Type which defines character in ASCII table
 typedef unsigned char ASCII;
 
+/// OS-independent operations on TRUE / FALSE values.
+#ifdef _WIN32
+    typedef BOOL RG_BOOL;
+    #define RG_TRUE TRUE
+    #define RG_FALSE FALSE
+#elif
+    typedef unsigned char RG_BOOL;
+    #define RG_TRUE 1
+    #define RG_FALSE 0
+#endif // _WIN32
+
 /// Colors
 #define COLOR_RED "\x1B[31m"
 #define COLOR_GREEN "\x1B[32m"
@@ -289,12 +300,12 @@ void PrintCameraView()
 ASCII tiles_to_print[CAMERA_SIZE * CAMERA_SIZE];
 
 /// Returns 1 if given tile is in tiles_to_print array
-BOOL IsTileInArray(ASCII tile)
+RG_BOOL IsTileInArray(ASCII tile)
 {
     for (int ut = 0; ut < CAMERA_SIZE * CAMERA_SIZE; ++ut) /// Check in array
         if (tiles_to_print[ut] == tile)
-            return TRUE;
-    return FALSE;
+            return RG_TRUE;
+    return RG_FALSE;
 }
 
 /// Add specified tile to tiles_to_print array
