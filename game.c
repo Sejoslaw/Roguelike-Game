@@ -72,15 +72,9 @@ typedef unsigned char Id;
 typedef unsigned char ASCII;
 
 /// OS-independent operations on TRUE / FALSE values.
-#ifdef _WIN32
-    typedef BOOL RG_BOOL;
-    #define RG_TRUE TRUE
-    #define RG_FALSE FALSE
-#elif
-    typedef unsigned char RG_BOOL;
-    #define RG_TRUE 1
-    #define RG_FALSE 0
-#endif // _WIN32
+typedef unsigned char RG_BOOL;
+#define RG_TRUE 1
+#define RG_FALSE 0
 
 /// Colors
 #define COLOR_RED "\x1B[31m"
@@ -333,15 +327,19 @@ void PrintOrigin()
     /// Add Player to Origin
     tiles_to_print[0] = CHAR_PLAYER;
 
+    /// FIX - Origin is not always correct
     /// Search all region
     for (int y = 0; y < CAMERA_SIZE; ++y)
         for (int x = 0; x < CAMERA_SIZE; ++x)
         {
-            ASCII tile = CAMERA_POS(x, y); /// Currently checking tile
-            if (tile != CHAR_EMPTY && tile != CHAR_SPACE) /// If checking tile is an empty space - don't add it
-                for (int i = 0; i < REGISTERED_CHAR_LENGTH; ++i)
-                    if (tile == REGISTERED_CHAR[i])
-                        AddTileToArray(tile);
+            if (!(CAMERA_POS_X_ON_WORLD(x) < 0) || !(CAMERA_POS_Y_ON_WORLD(y) < 0))
+            {
+                ASCII tile = CAMERA_POS(x, y); /// Currently checking tile
+                if (tile != CHAR_EMPTY && tile != CHAR_SPACE) /// If checking tile is an empty space - don't add it
+                    for (int i = 0; i < REGISTERED_CHAR_LENGTH; ++i)
+                        if (tile == REGISTERED_CHAR[i])
+                            AddTileToArray(tile);
+            }
         }
 
     /// Print tiles
@@ -423,10 +421,10 @@ int main(int argc, char *argv[])
         /// Execute right command
         if (input == 'q') /// Quit the game
             return 0;
-        else if (input == 's')
-            MoveEntity(PLAYER, PLAYER->PosX + 1, PLAYER->PosY);
         else if (input == 'w')
             MoveEntity(PLAYER, PLAYER->PosX - 1, PLAYER->PosY);
+        else if (input == 's')
+            MoveEntity(PLAYER, PLAYER->PosX + 1, PLAYER->PosY);
         else if (input == 'a')
             MoveEntity(PLAYER, PLAYER->PosX, PLAYER->PosY - 1);
         else if (input == 'd')
