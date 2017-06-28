@@ -46,19 +46,14 @@
 #include <stdbool.h>
 
 /// Add additional OS-specified libraries
-#ifdef _WIN32 || __WIN32 /// Windows
+/// Windows
+#if defined(_WIN32) || defined(__WIN32)
     #define OS_WINDOWS
     #include <windows.h>
-#elif __linux__ /// Linux
-#elif __sun /// Solaris
-#elif __FreeBSD__ /// FreeBSD
-#elif __NetBSD__ /// NetBSD
-#elif __OpenBSD__ /// OpenBSD
-#elif __APPLE__ /// Mac OS X
-#elif __hpux /// HP-UX
-#elif __osf__ /// Tru64 UNIX (formerly DEC OSF1)
-#elif __sgi /// Irix
-#elif _AIX /// AIX
+#endif
+/// Linux
+#if defined(linux)
+    #define OS_LINUX
 #endif
 
 /// Coordinate type - used for position manipulation
