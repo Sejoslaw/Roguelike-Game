@@ -164,7 +164,7 @@ const ASCII REGISTERED_CHAR[REGISTERED_CHAR_LENGTH] =
 
 /// ======================================================================== Utilities
 /// Returns a pseudo random number
-int random(int min, int max)
+int randomInRange(int min, int max)
 {
     int tmp;
     if (max >= min)
@@ -214,8 +214,8 @@ World* NewWorld(Id worldId)
 Entity* NewPlayer()
 {
     Entity *new_player = malloc(sizeof(Entity));
-    new_player->PosX = random(1, WORLD_SIZE - 1);
-    new_player->PosY = random(1, WORLD_SIZE - 1);
+    new_player->PosX = randomInRange(1, WORLD_SIZE - 1);
+    new_player->PosY = randomInRange(1, WORLD_SIZE - 1);
 
     return new_player;
 }
@@ -239,8 +239,8 @@ void GenerateWorld()
     /// FIX - check where stairs are placed when World is generated
     /// FIX - check if stairs and not on top of each other
     /// Add stairs to next and previous World
-    WORLD_POS(random(1, WORLD_SIZE - 1), random(1, WORLD_SIZE - 1)) = CHAR_STAIRS_UP;
-    WORLD_POS(random(1, WORLD_SIZE - 1), random(1, WORLD_SIZE - 1)) = CHAR_STAIRS_DOWN;
+    WORLD_POS(randomInRange(1, WORLD_SIZE - 1), randomInRange(1, WORLD_SIZE - 1)) = CHAR_STAIRS_UP;
+    WORLD_POS(randomInRange(1, WORLD_SIZE - 1), randomInRange(1, WORLD_SIZE - 1)) = CHAR_STAIRS_DOWN;
 }
 
 /// Print current view of the Camera to the screen
