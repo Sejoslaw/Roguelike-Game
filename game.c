@@ -130,18 +130,37 @@ typedef unsigned char RG_BOOL;
 /// Full size of the camera
 #define CAMERA_SIZE (CAMERA_DISTANCE * 2) + 1
 
+
+/// ============================================================= Command Definitions
+/// Commands definitions
+/// Exit
+#define COMMAND_EXIT "q"
+#define COMMAN_EXIT_TEXT COMMAND_EXIT " - Exit / Quit game"
+/// Move Up
+#define COMMAND_MOVE_UP "w"
+#define COMMAND_MOVE_UP_TEXT COMMAND_MOVE_UP " - Move Player Up"
+/// Move Down
+#define COMMAND_MOVE_DOWN "s"
+#define COMMAND_MOVE_DOWN_TEXT COMMAND_MOVE_DOWN " - Move Player Down"
+/// Move Left
+#define COMMAND_MOVE_LEFT "a"
+#define COMMAND_MOVE_LEFT_TEXT COMMAND_MOVE_LEFT " - Move Player Left"
+/// Move Right
+#define COMMAND_MOVE_RIGHT "d"
+#define COMMAND_MOVE_RIGHT_TEXT COMMAND_MOVE_RIGHT " - Move Player Right"
+
 /// Commands array length
-#define COMMAND_LENGTH 7
+#define COMMAND_LENGTH (sizeof(COMMAND) / sizeof(COMMAND[0]))
 /// Commands definition
 const char *COMMAND[] =
 {
     "",
     "Commands keys:",
-    "q - Exit / Quit game",
-    "w - Move Player Up",
-    "s - Move Player Down",
-    "a - Move Player Left",
-    "d - Move Player Right"
+    COMMAN_EXIT_TEXT,
+    COMMAND_MOVE_UP_TEXT,
+    COMMAND_MOVE_DOWN_TEXT,
+    COMMAND_MOVE_LEFT_TEXT,
+    COMMAND_MOVE_RIGHT_TEXT,
 };
 
 
@@ -165,9 +184,9 @@ const char *COMMAND[] =
 */
 
 /// Length of all registered chars
-#define REGISTERED_CHAR_LENGTH 8
+#define REGISTERED_CHAR_LENGTH (sizeof(REGISTERED_CHAR) / sizeof(REGISTERED_CHAR[0]))
 /// All currently registered chars array - except CHAR_EMPTY and CHAR_SPACE
-const ASCII REGISTERED_CHAR[REGISTERED_CHAR_LENGTH] =
+const ASCII REGISTERED_CHAR[] =
 {
     CHAR_WALL,
     CHAR_TUNNEL,
