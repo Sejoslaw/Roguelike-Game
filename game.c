@@ -63,6 +63,7 @@
 #include <string.h>
 #include <tgmath.h>
 //#include <threads.h>
+#include <pthread.h> // For multithreading in C
 #include <time.h>
 //#include <uchar.h>
 #include <wchar.h>
